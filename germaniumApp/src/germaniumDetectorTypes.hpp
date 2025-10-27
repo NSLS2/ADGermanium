@@ -45,32 +45,66 @@
 
 // MARS ASIC configuration structures - match original Mars_DDM
 struct globalstr_t
+//{
+//    int st;      // Shaping time
+//    int g;       // Gain  
+//    int pol;     // Polarity
+//    int eblk;    // Bias current enable
+//    int gmon;    // Global monitor mode
+//    int puen;    // Pileup rejection enable
+//    int mfs;     // Multi-fire suppression
+//    int tds;     // TDC slope
+//    int tdm;     // TDC mode
+//    int th;      // Threshold
+//    int c;       // Monitor channel
+//    int m0;      // Monitor mode
+//    int saux;    // Auxiliary select
+//};
+//struct chipstr
 {
-    int st;      // Shaping time
-    int g;       // Gain  
-    int pol;     // Polarity
-    int eblk;    // Bias current enable
-    int gmon;    // Global monitor mode
-    int puen;    // Pileup rejection enable
-    int mfs;     // Multi-fire suppression
-    int tds;     // TDC slope
-    int tdm;     // TDC mode
-    int th;      // Threshold
-    int c;       // Monitor channel
-    int m0;      // Monitor mode
-    int saux;    // Auxiliary select
+	unsigned int pa      {1023};  /* Threshold dac */
+	unsigned int pb      {0};	  /* Test pulse dac */
+	unsigned char rm     {1};	  /* Readout mods; 1=synch, 0=asynch */
+	unsigned char senfl1 {0};     /* Lock on peak found */
+	unsigned char senfl2 {1};     /* Lock on threshold */
+	unsigned char m0     {0};	  /* 1=channel mon, 0=others */
+	unsigned char m1     {1};	  /* 1=pk det on PD/PN; 0=other mons on PD/PN */
+	unsigned char sbn    {0};	  /* enable buffer on pdn & mon outputs */
+	unsigned char sb     {1};	  /* enable buffer on pd & mon outputs */
+	unsigned char sl     {0};	  /* 0=internal 2pA leakage, 1=disabled */
+	unsigned char ts     {1};	  /* Shaping time */
+	unsigned char rt     {0};	  /* 1=timing ramp duration x 3 */
+	unsigned char spur   {1};	  /* 1=enable pileup rejector */
+	unsigned char sse    {0};	  /* 1=enable multiple-firing suppression */
+	unsigned char tr     {1};	  /* timing ramp adjust */
+	unsigned char ss     {2};	  /* multiple firing time adjust */
+	unsigned char c      {31};	  /* m0=0,Monitor select. m0=1, channel being monitored */
+	unsigned char g      {1};	  /* Gain select */
+	unsigned char slh    {0};	  /* internal leakage adjust */
+	unsigned char sp     {1};	  /* Input polarity; 1=positive, 0=negative */
+	unsigned char saux   {0};	  /* Enable monitor output */
+	unsigned char sbm    {1};	  /* Enable output monitor buffer */
+	unsigned char tm     {0};	  /* Timing mode; 0=ToA, 1=ToT */
 };
-
 //===========================================================================//
 
 struct channelstr_t
+//{
+//    int chen;    // Channel enable
+//    int tsen;    // Test pulse input enable
+//    int thtr;    // Threshold trim
+//    int putr;    // Pileup threshold trim
+//};
+//struct chanstr
 {
-    int chen;    // Channel enable
-    int tsen;    // Test pulse input enable
-    int thtr;    // Threshold trim
-    int putr;    // Pileup threshold trim
+	unsigned char dp  {15};  /* Pileup rejector trim dac */
+	unsigned char nc1 {0};   /* no connection, set 0 */
+	unsigned char da  {5};   /* Threshold trim dac */
+	unsigned char sel {1};   /* 1=leakage current, 0=shaper output */
+	unsigned char nc2 {0};   /* no connection, set 0 */
+	unsigned char sm  {1};   /* 1=channel disable */
+	unsigned char st  {0};   /* 1=enable test input (30fF cap) */
 };
-
 //===========================================================================//
 
 // UDP protocol structures - Based on actual hardware specification
@@ -82,7 +116,7 @@ namespace DerivedNetwork {
         uint32_t data;
     };
 
-    struct AdcClkSkewReqMsgPayload
+    struct __attribute__((__packed__)) AdcClkSkewReqMsgPayload
     {
         uint16_t chip_num;
         uint16_t skew;
@@ -93,7 +127,7 @@ namespace DerivedNetwork {
         uint32_t loads[12][14];  // MARS configuration data
     };
 
-    struct ZddmArmReqMsgPayload
+    struct __attribute__((__packed__)) ZddmArmReqMsgPayload
     {
         uint16_t mode;
         uint16_t val;
@@ -113,13 +147,13 @@ namespace DerivedNetwork {
         uint32_t data;
     };
 
-    struct PsI2cRespMsgPayload
+    struct __attribute__((__packed__)) PsI2cRespMsgPayload
     {
         uint8_t length;
         uint8_t data[4];
     };
 
-    struct PsXadcRespMsgPayload
+    struct __attribute__((__packed__)) PsXadcRespMsgPayload
     {
         uint8_t length;
         uint8_t data[4];
@@ -137,7 +171,7 @@ namespace DerivedNetwork {
 //===========================================================================//
 
 // Main UDP message structures
-struct UdpReqMsg
+struct __attribute__((__packed__)) UdpReqMsg
 {   
     uint16_t                           id; 
     uint16_t                           op;
@@ -147,7 +181,7 @@ using UdpRxMsg = UdpReqMsg;
 
 //===========================================================================//
 
-struct UdpRespMsg
+struct __attribute__((__packed__)) UdpRespMsg
 {
     uint16_t                           id;
     uint16_t                           op;
@@ -176,7 +210,7 @@ inline uint16_t getOpAddress(uint16_t op) { return op & UDP_OP_ADDR_MASK; }
 //===========================================================================//
 
 // Photon event data structure for UDP data packets
-struct PhotonEvent
+struct __attribute__((__packed__)) PhotonEvent
 {
     uint16_t element;       // Detector element number
     uint16_t energy;        // Energy value
@@ -193,7 +227,7 @@ struct DataPacketHeader
 };
 
 // Event data structure
-struct EventData
+struct __attribute__((__packed__)) EventData
 {
     uint16_t channel;       // Channel number
     uint16_t energy;        // Energy value
@@ -212,7 +246,7 @@ struct StatusData
 };
 
 // File writing structures
-struct FileWriteBuffer
+struct __attribute__((__packed__)) FileWriteBuffer
 {
     uint8_t data[DATA_WRITE_BUFFER_SIZE];
     size_t writeIndex;

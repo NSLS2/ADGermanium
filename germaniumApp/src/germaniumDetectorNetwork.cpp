@@ -13,6 +13,7 @@
 //===========================================================================//
 
 #include "germaniumDetector.hpp"
+#include "errlog.h"
 #include <cstring>
 #include <cstdio>
 #include <unistd.h>
@@ -144,10 +145,13 @@ asynStatus germaniumDetector::sendUDPCommand( uint16_t op, uint32_t data )
     if (!udpInitialized) {
         return asynError;
     }
+
+    errlogPrintf( "[%s]: op = 0x%x, data = 0x%x\n", __func__, op, data );
     
     // Create proper UDP message structure
     UdpReqMsg msg;
     msg.id = 0x1234;  // Fixed ID for now - could be incremental
+    msg.op = op;
     size_t msgSize;
     
     // Determine if this is a read or write operation based on command
@@ -164,13 +168,13 @@ asynStatus germaniumDetector::sendUDPCommand( uint16_t op, uint32_t data )
     
     // Send command with mutex protection
     epicsMutexLock(udpMutex);
-    ssize_t sent = sendto( udpControlSocket
-                         , &msg
-                         , msgSize
-                         , 0
-                         , (struct sockaddr*)&deviceAddr
-                         , sizeof(deviceAddr)
-                         );
+    size_t sent = sendto( udpControlSocket
+                        , &msg
+                        , msgSize
+                        , 0
+                        , (struct sockaddr*)&deviceAddr
+                        , sizeof(deviceAddr)
+                        );
     epicsMutexUnlock(udpMutex);
     
     if (sent != msgSize)
@@ -180,6 +184,20 @@ asynStatus germaniumDetector::sendUDPCommand( uint16_t op, uint32_t data )
               , strerror(errno)
               );
         return asynError;
+    }
+    else
+    {
+        errlogPrintf( "[%s]: msg.id = 0x%x, msg.op = 0x%x, msg.data = 0x%x, msg.size = %lu\n"
+                    , __func__
+                    , msg.id
+                    , msg.op
+                    //, msg.payload.single_word.data
+                    , ntohl(msg.payload.single_word.data)
+                    , sent
+                    );
+
+        for( int i=0; i<sent/2; i++ )
+            errlogPrintf( "[%s]: %x\n", __func__, *((uint16_t*)(&msg)+i) );
     }
     
     return asynSuccess;
@@ -207,17 +225,17 @@ asynStatus germaniumDetector::udpRegisterRead(uint32_t reg)
 /*
  * ADC configuration via UDP command using proper message format
  */
-void germaniumDetector::ad9252_cnfg(int adc, int reg, int value)
+asynStatus germaniumDetector::ad9252Config(int adc, int value)
 {
     if (!udpInitialized) {
         printf("Germanium: UDP not initialized for ADC config\n");
-        return;
+        return asynError;
     }
     
     // Create proper UDP message for ADC clock skew configuration
     UdpReqMsg msg;
     msg.id = 0x1236;  // Different ID for ADC config
-    msg.op = makeWriteOp(0x4000);  // Special operation code for ADC config
+    msg.op = makeWriteOp(ADC_SKEW);  // Special operation code for ADC config
     
     // Use the AdcClkSkewReqMsgPayload structure
     msg.payload.ad9252_clk_skew.chip_num = htons(adc);
@@ -232,10 +250,15 @@ void germaniumDetector::ad9252_cnfg(int adc, int reg, int value)
                          (struct sockaddr*)&deviceAddr, sizeof(deviceAddr));
     epicsMutexUnlock(udpMutex);
     
-    if (sent != sizeof(msg)) {
+    if (sent != sizeof(msg))
+    {
         printf("Germanium: Failed to send ADC config: %s\n", strerror(errno));
-    } else {
+        return asynError;
+    }
+    else
+    {
         printf("Germanium: ADC[%d] configured with skew=%d\n", adc, value);
+        return asynSuccess;
     }
 }
 
@@ -251,11 +274,13 @@ asynStatus germaniumDetector::sendMarsConfiguration()
         printf("Germanium: UDP not initialized, cannot send MARS configuration\n");
         return asynError;
     }
+
+    wrap();
     
     // Create proper UDP message for MARS configuration
     UdpReqMsg msg;
     msg.id = 0x1235;  // Different ID for MARS config
-    msg.op = makeWriteOp(0x3000);  // Special operation code for MARS config
+    msg.op = makeWriteOp(STUFF_MARS);  // Special operation code for MARS config
     
     memcpy(msg.payload.stuff_mars.loads, loads, sizeof(loads));
     
@@ -287,7 +312,7 @@ asynStatus germaniumDetector::sendMarsConfiguration()
     
     printf( "Sent MARS configuration (%zu bytes) for %d chips\n"
           , sizeof(msg.payload.stuff_mars)
-          , nchips
+          , nchips_
           );
 
     return asynSuccess;
@@ -333,13 +358,32 @@ void germaniumDetector::udpDataThread()
         if (result > 0 && FD_ISSET(udpDataSocket, &readfds))
         {   
             // Receive data packet
-            ssize_t bytesReceived = recvfrom(udpDataSocket, receiveBuffer, sizeof(receiveBuffer), 0,
-                                           (struct sockaddr*)&senderAddr, &senderAddrLen);
+            ssize_t bytesReceived = recvfrom( udpDataSocket
+                                            , receiveBuffer
+                                            , sizeof(receiveBuffer)
+                                            , 0
+                                            , (struct sockaddr*)&senderAddr, &senderAddrLen
+                                            );
 
             if (bytesReceived > 0)
             {
-                // Process received data
-                //processReceivedData(receiveBuffer, static_cast<size_t>(bytesReceived));
+                // Check packet format
+
+                uint32_t idx;
+                if ( !pool.acquire(idx) )  // Drop the packet if buffer not available
+                {
+                    errlogPrintf(" Error! Buffer unavailable for received packet!\n" );
+                    continue;
+                }
+
+                pool[idx] = static_cast<Packet>(recvBuffer);
+
+                uint32_t qw = static_cast<uint32_t>( bytesReceived / 8 );
+                if ( qw == 0 )
+                {
+                    continue;
+                }
+                pool[idx].set_qw_len( qw );
             }
             else if (bytesReceived < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
             {

@@ -36,7 +36,11 @@
 #define FRAME_NO            55
 #define COUNT_MODE          56
 
-#define LOADS               80
+#define ADC_SKEW            60
+#define ZDDM_ARM            61
+#define STUFF_MARS          62
+
+#define NELM                70
 #define TEMP1               90
 #define TEMP2               91
 #define TEMP3               92
@@ -44,3 +48,8 @@
 #define HV                  94
 #define HV_RBV              95
 #define HV_CURR             96
+
+// ADC_SPI
+// ADC_CLK_SKEW
+// ZDDM_ARM
+// DAC_INT_REF
