@@ -407,7 +407,7 @@ void GermaniumDetector::setGermaniumInitialValues()
     setIntegerParam(GermaniumPLDEL_RBV, 0);
     setIntegerParam(GermaniumRODEL_RBV, 0);
 
-    setIntegerParam(GermaniumFVER, 0);
+    //setIntegerParam(GermaniumFVER, 0);
     setIntegerParam(GermaniumCARD, 0);
 
     setIntegerParam(GermaniumNCH, 0);
@@ -446,6 +446,7 @@ void GermaniumDetector::setGermaniumInitialValues()
     setDoubleParam(GermaniumDLY1, 0.0);
     setDoubleParam(GermaniumTP,   0.0);
     setDoubleParam(GermaniumT,    0.0);
+
 
     // Sensors
     setDoubleParam(GermaniumTEMP1,   0.0);

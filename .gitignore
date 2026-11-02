@@ -8,6 +8,8 @@ O.*/
 *.a
 *.so
 *_registerRecordDeviceDriver.cpp
+GermaniumDetectorProtocol.cpp
+GermaniumDetectorProtocol.hpp
 envPaths
 .vscode/
 pv.list

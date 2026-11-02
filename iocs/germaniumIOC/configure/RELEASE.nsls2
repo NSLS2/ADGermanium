@@ -4,7 +4,9 @@ SUPPORT     = /usr/lib/epics
 ASYN        = $(SUPPORT)
 BUSY        = $(SUPPORT)
 CALC        = $(SUPPORT)
+IOC_ADMIN   = $(SUPPORT)
 SSCAN       = $(SUPPORT)
+AUTOSAVE    = $(SUPPORT)
 EPICS_BASE  = $(SUPPORT)
 ADGERMANIUM = /epics/modules/ADGermanium
 

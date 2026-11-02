@@ -345,7 +345,12 @@ void GermaniumDetector::plUdpDataThread()
             continue;
         }
 
-        //std::println("[{}]: {} bytes received", __func__, bytesReceived);
+        asynPrint( pasynUserSelf
+                 , ASYN_TRACE_WARNING
+                 , "%s: %ld bytes received\n"
+                 , __func__
+                 , bytesReceived
+                 );
         
         block->size = static_cast<size_t>(bytesReceived);
         dataQueue->push();

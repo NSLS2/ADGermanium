@@ -12,6 +12,8 @@ $(PROD_NAME)_DBD += GermaniumDetectorSupport.dbd
 $(PROD_NAME)_DBD += asyn.dbd
 $(PROD_NAME)_DBD += busySupport.dbd
 $(PROD_NAME)_DBD += calcSupport.dbd
+$(PROD_NAME)_DBD += devIocStats.dbd
+$(PROD_NAME)_DBD += asSupport.dbd
 
 
 PROD_SRCS += $(PROD_NAME)_registerRecordDeviceDriver.cpp
@@ -19,6 +21,8 @@ PROD_SRCS += $(PROD_NAME)Main.cpp
 
 PROD_LIBS += GermaniumDetector
 PROD_LIBS += busy
+PROD_LIBS += devIocStats
+PROD_LIBS += autosave
 
 # ZMQ system library
 PROD_SYS_LIBS += zmq

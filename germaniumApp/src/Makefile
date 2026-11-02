@@ -27,7 +27,7 @@ LIBS += asyn
 #LIB_SYS_LIBS += zmq
 
 CCC = /opt/rh/gcc-toolset-15/root/bin/g++
-USR_CXXFLAGS += -std=c++20
+USR_CXXFLAGS += -std=c++23
 
 ##========================================================
 ## TEMPORARY FIX
