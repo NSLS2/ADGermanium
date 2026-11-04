@@ -449,17 +449,17 @@ void GermaniumDetector::setGermaniumInitialValues()
 
 
     // Sensors
-    setDoubleParam(GermaniumTEMP1,   0.0);
-    setDoubleParam(GermaniumTEMP2,   0.0);
-    setDoubleParam(GermaniumTEMP3,   0.0);
-    setDoubleParam(GermaniumZTEMP,   0.0);
-    setDoubleParam(GermaniumHV,      0.0);
-    setDoubleParam(GermaniumHV_RBV,  0.0);
-    setDoubleParam(GermaniumHV_CURR, 0.0);
-    setDoubleParam(GermaniumP1,      0.0);
-    setDoubleParam(GermaniumP2,      0.0);
-    setDoubleParam(GermaniumP1_CURR, 0.0);
-    setDoubleParam(GermaniumP2_CURR, 0.0);
+    //setDoubleParam(GermaniumTEMP1,   0.0);
+    //setDoubleParam(GermaniumTEMP2,   0.0);
+    //setDoubleParam(GermaniumTEMP3,   0.0);
+    //setDoubleParam(GermaniumZTEMP,   0.0);
+    //setDoubleParam(GermaniumHV,      0.0);
+    //setDoubleParam(GermaniumHV_RBV,  0.0);
+    //setDoubleParam(GermaniumHV_CURR, 0.0);
+    //setDoubleParam(GermaniumP1,      0.0);
+    //setDoubleParam(GermaniumP2,      0.0);
+    //setDoubleParam(GermaniumP1_CURR, 0.0);
+    //setDoubleParam(GermaniumP2_CURR, 0.0);
 
     callParamCallbacks();
 }
